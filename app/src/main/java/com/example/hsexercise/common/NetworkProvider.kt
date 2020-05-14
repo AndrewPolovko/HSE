@@ -1,6 +1,7 @@
 package com.example.hsexercise.common
 
 import com.example.hsexercise.BuildConfig
+import com.example.hsexercise.feature.network.PicsumApi
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -17,7 +18,11 @@ import java.util.concurrent.TimeUnit
 import javax.net.ssl.HostnameVerifier
 
 object NetworkProvider {
-    fun provideRestClient() =
+
+    val networkApi : PicsumApi =
+        provideRestClient().createRetrofitAdapter().create(PicsumApi::class.java)
+
+    private fun provideRestClient() =
         RestClient(RestClientConfig(
             provideGsonConverterFactory(),
             provideRxJava2CallAdapterFactory()).apply {
