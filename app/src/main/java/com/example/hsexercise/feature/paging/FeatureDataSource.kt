@@ -16,7 +16,7 @@ class FeatureDataSource(
         params: LoadInitialParams<Int>,
         callback: LoadInitialCallback<Int, FeatureModel>
     ) {
-        featureRepository.getPicturesFromNetwork(DEFAULT_PAGE_NUMBER)
+        featureRepository.getPicturesByPage(DEFAULT_PAGE_NUMBER)
             .subscribe(
                 { pictures: List<FeatureModel> ->
                     dataSourceCallback.onInitialItemsLoaded(pictures.isEmpty())
@@ -33,7 +33,7 @@ class FeatureDataSource(
 
     override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, FeatureModel>) {
         dataSourceCallback.onLoadMoreStarted()
-        featureRepository.getPicturesFromNetwork(params.key)
+        featureRepository.getPicturesByPage(params.key)
             .subscribe(
                 { pictures: List<FeatureModel> ->
                     dataSourceCallback.onLoadMoreEnded(isSuccessful = true)
@@ -57,6 +57,7 @@ class FeatureDataSource(
     }
 
     private companion object {
-        const val DEFAULT_PAGE_NUMBER = 0
+        // Start from page 1 because PicsumApi returns data with identical ID's for 0 and 1 pages
+        const val DEFAULT_PAGE_NUMBER = 1
     }
 }

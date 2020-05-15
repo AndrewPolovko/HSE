@@ -10,6 +10,7 @@ import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import com.example.hsexercise.common.DataSourceCallback
 import com.example.hsexercise.common.NetworkProvider
+import com.example.hsexercise.feature.database.FeatureDatabase
 import com.example.hsexercise.feature.database.FeatureModel
 import com.example.hsexercise.feature.paging.FeatureDataSourceFactory
 import com.example.hsexercise.feature.paging.FeatureRepository
@@ -19,7 +20,10 @@ class FeatureViewModel(
     application: Application
 ) : AndroidViewModel(application), DataSourceCallback {
 
-    private val repository = FeatureRepository(NetworkProvider.networkApi)
+    private val repository = FeatureRepository(
+        NetworkProvider.networkApi,
+        FeatureDatabase.getDatabase(application).featureTableDao()
+    )
     private val compositeDisposable = CompositeDisposable()
     private val sourceFactory = FeatureDataSourceFactory(repository, compositeDisposable, this)
 
