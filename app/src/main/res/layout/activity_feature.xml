@@ -23,9 +23,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/common_content_margin_small"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,7 +58,7 @@
         android:layout_width="@dimen/progress_bar_size"
         android:layout_height="@dimen/progress_bar_size"
         android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/common_content_margin_small"
+        android:layout_marginBottom="@dimen/common_content_spacing_small"
         app:layout_constraintBottom_toBottomOf="@id/recycler"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
