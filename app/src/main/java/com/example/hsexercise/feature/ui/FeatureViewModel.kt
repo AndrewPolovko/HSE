@@ -8,52 +8,39 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
-import com.example.hsexercise.common.DataSourceCallback
 import com.example.hsexercise.common.NetworkProvider
 import com.example.hsexercise.feature.database.FeatureDatabase
 import com.example.hsexercise.feature.database.FeatureModel
+import com.example.hsexercise.feature.paging.FeatureDataSource
 import com.example.hsexercise.feature.paging.FeatureDataSourceFactory
 import com.example.hsexercise.feature.paging.FeatureRepository
 import io.reactivex.disposables.CompositeDisposable
 
 class FeatureViewModel(
     application: Application
-) : AndroidViewModel(application), DataSourceCallback {
+) : AndroidViewModel(application) {
+
+    val initialLoadingState: LiveData<FeatureDataSource.InitialLoadingState> get() = _initialLoadingState
+    val loadMoreState: LiveData<FeatureDataSource.LoadMoreState> get() = _loadMoreState
+    val livePagedList: LiveData<PagedList<FeatureModel>> get() = _livePagedList
+
+    private val _initialLoadingState = MutableLiveData<FeatureDataSource.InitialLoadingState>()
+    private val _loadMoreState = MutableLiveData<FeatureDataSource.LoadMoreState>()
 
     private val repository = FeatureRepository(
         NetworkProvider.networkApi,
         FeatureDatabase.getDatabase(application).featureTableDao()
     )
     private val compositeDisposable = CompositeDisposable()
-    private val sourceFactory = FeatureDataSourceFactory(repository, compositeDisposable, this)
-
-
-    private val _initialProgressVisibility = MutableLiveData<Boolean>().apply { postValue(true) }
-    private val _loadMoreProgressVisibility = MutableLiveData<Boolean>()
+    private val sourceFactory = FeatureDataSourceFactory(
+        repository,
+        compositeDisposable,
+        _initialLoadingState,
+        _loadMoreState
+    )
     private val _livePagedList = sourceFactory.toLiveData(DEFAULT_PAGE_SIZE)
 
-    val initialProgressVisibility: LiveData<Boolean> get() = _initialProgressVisibility
-    val loadMoreProgressVisibility: LiveData<Boolean> get() = _loadMoreProgressVisibility
-    val pictures: LiveData<PagedList<FeatureModel>> get() = _livePagedList
-
-    override fun onInitialItemsLoaded(isEmpty: Boolean) {
-        _initialProgressVisibility.postValue(false)
-        // TODO empty state
-    }
-
-    override fun onInitialLoadError() {
-        _initialProgressVisibility.postValue(false)
-        // TODO error state
-    }
-
-    override fun onLoadMoreStarted() {
-        _loadMoreProgressVisibility.postValue(true)
-    }
-
-    override fun onLoadMoreEnded(isSuccessful: Boolean) {
-        _loadMoreProgressVisibility.postValue(false)
-        // TODO show toast for unsuccessful cases
-    }
+    // TODO Invalidate data source when network connectivity is regained.
 
     override fun onCleared() {
         super.onCleared()
