@@ -7,8 +7,7 @@ import androidx.core.view.isVisible
 import com.example.hsexercise.R
 import com.example.hsexercise.common.BaseActivity
 import com.example.hsexercise.databinding.ActivityFeatureBinding
-import com.example.hsexercise.feature.paging.FeatureDataSource.InitialLoadingState
-import com.example.hsexercise.feature.paging.FeatureDataSource.LoadMoreState
+import com.example.hsexercise.feature.paging.FeatureDataSource.LoadingState
 
 class FeatureActivity : BaseActivity<FeatureViewModel>() {
 
@@ -29,17 +28,17 @@ class FeatureActivity : BaseActivity<FeatureViewModel>() {
         binding.recycler.adapter = recyclerAdapter
 
         viewModel.initialLoadingState.observe(this, Observer {
-            binding.initialProgress.isVisible = (it == InitialLoadingState.LOADING)
-            binding.initialLoadEmptyGroup.isVisible = (it == InitialLoadingState.LOADED_EMPTY)
-            binding.initialLoadErrorGroup.isVisible = (it == InitialLoadingState.FAILED)
-            binding.recycler.isVisible = (it == InitialLoadingState.LOADED)
+            binding.initialProgress.isVisible = (it == LoadingState.LOADING)
+            binding.initialLoadEmptyGroup.isVisible = (it == LoadingState.LOADED_EMPTY)
+            binding.initialLoadErrorGroup.isVisible = (it == LoadingState.FAILED)
+            binding.recycler.isVisible = (it == LoadingState.LOADED)
         })
         viewModel.loadMoreState.observe(this, Observer {
-            binding.loadMoreGroup.isVisible = (it == LoadMoreState.LOADING)
+            binding.loadMoreGroup.isVisible = (it == LoadingState.LOADING)
 
             // TODO Send error from VM as Single live event to not trigger
             //  toast on every screen rotation.
-            if (it == LoadMoreState.FAILED) {
+            if (it == LoadingState.FAILED) {
                 showLoadMoreError()
             }
         })

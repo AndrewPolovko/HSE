@@ -10,80 +10,74 @@ import io.reactivex.disposables.Disposable
 class FeatureDataSource(
     private val featureRepository: FeatureRepository,
     private val compositeDisposable: CompositeDisposable,
-    private val initialLoadingLiveData: MutableLiveData<InitialLoadingState>,
-    private val loadMoreLiveData : MutableLiveData<LoadMoreState>
+    private val initialLoadingLiveData: MutableLiveData<LoadingState>,
+    private val loadMoreLiveData: MutableLiveData<LoadingState>
 ) : PageKeyedDataSource<Int, FeatureModel>() {
 
     override fun loadInitial(
         params: LoadInitialParams<Int>,
         callback: LoadInitialCallback<Int, FeatureModel>
     ) {
-        featureRepository.getPicturesByPage(DEFAULT_PAGE_NUMBER)
-            .doOnSubscribe {
-                initialLoadingLiveData.postValue(InitialLoadingState.LOADING)
-            }
-            .doOnSuccess {
-                val loadingState = if (it.isEmpty()) {
-                    InitialLoadingState.LOADED_EMPTY
-                } else {
-                    InitialLoadingState.LOADED
-                }
-                initialLoadingLiveData.postValue(loadingState)
-            }
-            .doOnError {
-                initialLoadingLiveData.postValue(InitialLoadingState.FAILED)
-            }
-            .subscribe(
-                { resultPage: List<FeatureModel> ->
-                    val nextPageKey = if (resultPage.isEmpty()) {
-                        null
-                    } else {
-                        DEFAULT_PAGE_NUMBER + 1
-                    }
-                    callback.onResult(resultPage, null, nextPageKey)
-                },
-                { Log.e(TAG, "loadInitial", it) }
-            ).addTo(compositeDisposable)
+        fetchPageFromRepository(
+            requestedPage = DEFAULT_PAGE_NUMBER,
+            loadingStateLiveData = initialLoadingLiveData
+        ) { resultPage, nextPageKey ->
+            callback.onResult(resultPage, null, nextPageKey)
+        }
     }
 
     override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, FeatureModel>) {
-        featureRepository.getPicturesByPage(params.key)
-            .doOnSubscribe {
-                loadMoreLiveData.postValue(LoadMoreState.LOADING)
-            }
-            .doOnSuccess {
-                loadMoreLiveData.postValue(LoadMoreState.LOADED)
-            }
-            .doOnError {
-                loadMoreLiveData.postValue(LoadMoreState.FAILED)
-            }
-            .subscribe(
-                { resultPage: List<FeatureModel> ->
-                    val nextPageKey = if (resultPage.isEmpty()) {
-                        null
-                    } else {
-                        params.key + 1
-                    }
-                    callback.onResult(resultPage, nextPageKey)
-                },
-                { Log.e(TAG, "loadAfter, requested page: ${params.key}", it) }
-            ).addTo(compositeDisposable)
+        fetchPageFromRepository(
+            requestedPage = params.key,
+            loadingStateLiveData = loadMoreLiveData
+        ) { resultPage, nextPageKey ->
+            callback.onResult(resultPage, nextPageKey)
+        }
     }
 
     override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, FeatureModel>) {
         // ignored, because we only append new items to our initial load
     }
 
+    private fun fetchPageFromRepository(
+        requestedPage: Int,
+        loadingStateLiveData: MutableLiveData<LoadingState>,
+        resultFunction: (resultPage: List<FeatureModel>, nextPageKey: Int?) -> Unit
+    ) {
+        featureRepository.getPicturesByPage(requestedPage)
+            .doOnSubscribe {
+                loadingStateLiveData.postValue(LoadingState.LOADING)
+            }
+            .doOnSuccess {
+                val loadingState = if (it.isEmpty()) {
+                    LoadingState.LOADED_EMPTY
+                } else {
+                    LoadingState.LOADED
+                }
+                loadingStateLiveData.postValue(loadingState)
+            }
+            .doOnError {
+                loadingStateLiveData.postValue(LoadingState.FAILED)
+            }
+            .subscribe(
+                { resultPage: List<FeatureModel> ->
+                    val nextPageKey = if (resultPage.isEmpty()) {
+                        null
+                    } else {
+                        requestedPage + 1
+                    }
+                    resultFunction(resultPage, nextPageKey)
+                },
+                { Log.e(TAG, "fetchPageFromRepository, requested page: $requestedPage", it) }
+            ).addTo(compositeDisposable)
+    }
+
     private fun Disposable.addTo(compositeDisposable: CompositeDisposable) {
         compositeDisposable.add(this)
     }
 
-    enum class InitialLoadingState {
+    enum class LoadingState {
         LOADING, LOADED, LOADED_EMPTY, FAILED
-    }
-
-    enum class LoadMoreState {
-        LOADING, LOADED, FAILED
     }
 
     private companion object {

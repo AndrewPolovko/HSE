@@ -20,12 +20,12 @@ class FeatureViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    val initialLoadingState: LiveData<FeatureDataSource.InitialLoadingState> get() = _initialLoadingState
-    val loadMoreState: LiveData<FeatureDataSource.LoadMoreState> get() = _loadMoreState
+    val initialLoadingState: LiveData<FeatureDataSource.LoadingState> get() = _initialLoadingState
+    val loadMoreState: LiveData<FeatureDataSource.LoadingState> get() = _loadMoreState
     val livePagedList: LiveData<PagedList<FeatureModel>> get() = _livePagedList
 
-    private val _initialLoadingState = MutableLiveData<FeatureDataSource.InitialLoadingState>()
-    private val _loadMoreState = MutableLiveData<FeatureDataSource.LoadMoreState>()
+    private val _initialLoadingState = MutableLiveData<FeatureDataSource.LoadingState>()
+    private val _loadMoreState = MutableLiveData<FeatureDataSource.LoadingState>()
 
     private val repository = FeatureRepository(
         NetworkProvider.networkApi,
