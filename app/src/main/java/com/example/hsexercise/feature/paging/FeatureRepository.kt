@@ -1,5 +1,6 @@
 package com.example.hsexercise.feature.paging
 
+import androidx.annotation.VisibleForTesting
 import com.example.hsexercise.feature.database.FeatureModel
 import com.example.hsexercise.feature.database.FeatureTableDao
 import com.example.hsexercise.feature.network.PicsumApi
@@ -21,15 +22,18 @@ class FeatureRepository(
             }
     }
 
-    private fun loadNewNetworkPage(pageNumber: Int): Maybe<List<FeatureModel>> {
+    @VisibleForTesting
+    fun loadNewNetworkPage(pageNumber: Int): Maybe<List<FeatureModel>> {
         return networkApi.getPictures(pageNumber)
-            .map { mapNetworkPageToDbPage(it, pageNumber) }
             .doOnSuccess {
-                databaseApi.insertAll(it)
+                databaseApi.insertAll(
+                    mapNetworkPageToDbPage(it, pageNumber)
+                )
             }
     }
 
-    private fun mapNetworkPageToDbPage(
+    @VisibleForTesting
+    fun mapNetworkPageToDbPage(
         networkPage: List<FeatureModel>,
         pageNumber: Int
     ): List<FeatureModel> {

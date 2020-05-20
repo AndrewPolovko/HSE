@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: "de.mannodermaus.android-junit5"
 
 android {
     compileSdkVersion 29
@@ -59,11 +60,10 @@ dependencies {
     final OKHTTP_VERSION = "4.2.2"
     implementation "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
     implementation "com.squareup.okhttp3:logging-interceptor:${OKHTTP_VERSION}"
-    implementation 'com.itkacher.okhttpprofiler:okhttpprofiler:1.0.5'
     implementation 'org.conscrypt:conscrypt-android:2.2.1'
 
     // Retrofit
-    final RETROFIT_VERSION = "2.6.2"
+    final RETROFIT_VERSION = '2.8.2'
     implementation "com.squareup.retrofit2:adapter-rxjava2:${RETROFIT_VERSION}"
     implementation "com.squareup.retrofit2:converter-gson:${RETROFIT_VERSION}"
     implementation("com.squareup.retrofit2:retrofit:${RETROFIT_VERSION}") {
@@ -82,4 +82,9 @@ dependencies {
     kapt("com.github.bumptech.glide:compiler:${GLIDE_VERSION}") {
         exclude group: 'com.android.support'
     }
+
+    testImplementation 'com.github.javafaker:javafaker:1.0.2'
+    testImplementation "io.mockk:mockk:1.10.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
 }
