@@ -11,19 +11,41 @@ import io.reactivex.Maybe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.net.UnknownHostException
 
 class FeatureRepositoryTest {
 
-    @RelaxedMockK
+    @MockK
     private lateinit var networkApi: PicsumApi
 
     @RelaxedMockK
     private lateinit var databaseApi: FeatureTableDao
 
     private lateinit var repository: FeatureRepository
+
+    private val faker = Faker()
+    private val TEST_PAGE_NUMBER = faker.number().randomDigitNotZero()
+    private val testNetworkEntity = FeatureModel(
+        faker.idNumber().valid(),
+        faker.artist().name(),
+        faker.internet().url(),
+        faker.number().randomDigitNotZero(),
+        faker.number().randomDigitNotZero()
+    )
+    private val testDbEntity = FeatureModel(
+        testNetworkEntity.id,
+        testNetworkEntity.author,
+        testNetworkEntity.url,
+        testNetworkEntity.width,
+        testNetworkEntity.height,
+        TEST_PAGE_NUMBER
+    )
+    private val testNetworkPage = listOf(testNetworkEntity)
+    private val testDbPage = listOf(testDbEntity)
+    private val offlineException = UnknownHostException()
 
     @BeforeEach
     fun setUp() {
@@ -122,28 +144,5 @@ class FeatureRepositoryTest {
     @AfterEach
     fun tearDown() {
         clearAllMocks()
-    }
-
-    private companion object {
-        val faker = Faker()
-        val TEST_PAGE_NUMBER = faker.number().randomDigitNotZero()
-        val testNetworkEntity = FeatureModel(
-            faker.idNumber().valid(),
-            faker.artist().name(),
-            faker.internet().url(),
-            faker.number().randomDigitNotZero(),
-            faker.number().randomDigitNotZero()
-        )
-        val testDbEntity = FeatureModel(
-            testNetworkEntity.id,
-            testNetworkEntity.author,
-            testNetworkEntity.url,
-            testNetworkEntity.width,
-            testNetworkEntity.height,
-            TEST_PAGE_NUMBER
-        )
-        val testNetworkPage = listOf(testNetworkEntity)
-        val testDbPage = listOf(testDbEntity)
-        val offlineException = UnknownHostException()
     }
 }
